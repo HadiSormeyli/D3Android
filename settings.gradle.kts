@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "D3Android"
 include(":app")
- 
+include(":D3Android")
