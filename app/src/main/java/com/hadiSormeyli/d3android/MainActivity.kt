@@ -95,11 +95,49 @@ class MainActivity : AppCompatActivity() {
 //                )
 //            )
 
-            val data = distributeDataIntoGroups()
+            val data = createTreeMapData()
+
+
             withContext(Dispatchers.Main) {
                 stockTreeMapVew.api.setData(data)
             }
         }
+    }
+
+    fun createTreeMapData(): TreeMapNodeData {
+        return TreeMapNodeData(
+            name = "نقشه بازار",  // "Market Map"
+            children = listOf(
+                TreeMapNodeData(
+                    name = "فروشگاه الکترونیک",  // "Electronics Store"
+                    children = listOf(
+                        TreeMapNodeData(name = "تلویزیون", value = 200f, colorValue = 10f),  // "TV"
+                        TreeMapNodeData(name = "گوشی موبایل", value = 100f, colorValue = -10f),  // "Mobile Phone"
+                        TreeMapNodeData(name = "لپ‌تاپ", value = 150f, colorValue = 5f),  // "Laptop"
+                        TreeMapNodeData(name = "دوربین عکاسی", value = 50f, colorValue = -5f),  // "Camera"
+                        TreeMapNodeData(name = "کنسول بازی", value = 50f, colorValue = -5f)  // "Game Console"
+                    )
+                ),
+                TreeMapNodeData(
+                    name = "فروشگاه پوشاک",  // "Clothing Store"
+                    children = listOf(
+                        TreeMapNodeData(name = "پیراهن مردانه", value = 200f, colorValue = 0f),  // "Men's Shirt"
+                        TreeMapNodeData(name = "دستکش زنانه", value = 400f, colorValue = 20f),  // "Women's Gloves"
+                        TreeMapNodeData(name = "کت و شلوار", value = 250f, colorValue = 10f),  // "Suit"
+                        TreeMapNodeData(name = "کفش ورزشی", value = 150f, colorValue = -10f)  // "Sports Shoes"
+                    )
+                ),
+                TreeMapNodeData(
+                    name = "فروشگاه لوازم خانگی",  // "Home Appliances Store"
+                    children = listOf(
+                        TreeMapNodeData(name = "یخچال", value = 300f, colorValue = 15f),  // "Refrigerator"
+                        TreeMapNodeData(name = "ماشین لباسشویی", value = 100f, colorValue = -5f),  // "Washing Machine"
+                        TreeMapNodeData(name = "آسیاب برقی", value = 450f, colorValue = 25f),  // "Electric Grinder"
+                        TreeMapNodeData(name = "چای ساز", value = 50f, colorValue = -15f)  // "Tea Maker"
+                    )
+                )
+            )
+        )
     }
 
     fun distributeDataIntoGroups() : TreeMapNodeData {

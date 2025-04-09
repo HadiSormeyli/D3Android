@@ -7,69 +7,332 @@
     <title>Smart Zoomable Treemap</title>
     <script src="d3.v7.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
+        @font-face {
+              font-family: 'dana';
+              src: url('file:///android_asset/dana_fa_medium.ttf') format('truetype');
+              font-weight: normal;
+              font-style: normal;
+          }
 
-        .header {
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            fill: #fff;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-        }
+          body {
+              margin: 0;
+              font-family: 'dana';
+              overflow: hidden;
+          }
 
-        .label {
-            font-size: 12px;
-            fill: white;
-            pointer-events: none;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
+          .header {
+              font-family: 'dana';
+              pointer-events: none;
+              text-overflow: clip;
+              overflow: hidden;
+              white-space: nowrap;
+          }
 
-        .back-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 8px 16px;
-            background: #4d8b7d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 100;
-            display: none;
-            font-size: 14px;
-        }
+          .label {
+              font-family: 'dana';
+              pointer-events: none;
+          }
 
-        .back-button:hover {
-            background: #3a6a5e;
-        }
+          .hidden-text {
+              opacity: 0;
+          }
 
-        .node rect {
-            stroke: #fff;
-            stroke-width: 0.5px;
-        }
-
-        .node text {
-            transition: opacity 0.3s;
-        }
-
-        .hidden-text {
-            opacity: 0;
-        }
-
-        .visible-text {
-            opacity: 1;
-        }
+          .visible-text {
+              opacity: 1;
+          }
     </style>
 </head>
 
 <body>
 <svg width="100%" height="100%"></svg>
-<script src="d3.min.js"></script>
+<script>
+    const margin = { top: 0, right: 0, bottom: 0, left: 0 };
+    const width = window.innerWidth - margin.left - margin.right;
+    const height = window.innerHeight - margin.top - margin.bottom;
+
+    const outerSvg = d3.select("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const zoomLayer = outerSvg.append("g");
+    const backButton = d3.select(".back-button");
+    let allData = []
+    let currentRoot = null;
+    let historyStack = [];
+    let currentScale = 1;
+    let colorParser = {
+        headerColor: "#4A4D57",
+        range: 0,
+        colors: ["#B53849", "#414554", "#318F54"]
+    };
+
+    function containsCurrentRootName(node) {
+        if (!currentRoot) {
+            return false;
+        }
+
+        if (node.name === currentRoot.data.name) {
+            return true;
+        }
+
+        if (node.children) {
+            for (let child of node.children) {
+                if (child.name == currentRoot.data.name) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function setData(data) {
+        allData = data;
+        const root = d3.hierarchy(data)
+            .sum(d => d.value)
+            .sort((a, b) => b.value - a.value);
+
+
+        if (!containsCurrentRootName(data)) {
+            currentRoot = root;
+        }
+        drawTreemap(currentRoot);
+    }
+
+    function getColor(d) {
+        if (!d.children) {
+            if (d.data.colorValue > 0) return colorParser.colors[2];
+            if (d.data.colorValue === 0) return colorParser.colors[1];
+            return colorParser.colors[0];
+        }
+        return colorParser.headerColor;
+    }
+
+    function textFits(d, scale = 1) {
+        const boxWidth = (d.x1 - d.x0) * scale;
+        const boxHeight = (d.y1 - d.y0) * scale;
+        const avgCharWidth = 8;
+        const lineHeight = 14;
+        const textLines = 2;
+
+        const maxLineLength = Math.max(
+            d.data.name.length * avgCharWidth,
+            String(d.value).length * avgCharWidth
+        );
+
+        return maxLineLength <= boxWidth && (lineHeight * textLines) <= boxHeight;
+    }
+
+    function drawTreemap(rootNode) {
+        zoomLayer.selectAll("*").remove();
+
+        const treemap = d3.treemap()
+            .size([width, height])
+            .paddingTop(20)
+            .round(true);
+
+        const rootCopy = d3.hierarchy(rootNode.data ? rootNode.data : rootNode)
+            .sum(d => d.value)
+            .sort((a, b) => b.value - a.value);
+
+        treemap(rootCopy);
+
+        const allNodes = zoomLayer.selectAll(".node")
+            .data(rootCopy.descendants())
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.x0}, ${d.y0})`);
+
+        allNodes.append("rect")
+            .style("stroke", d => d.children ? "#888" : "#4A4D57")
+            .style("stroke-width", d => d.children ? 0.25 : 0.5)
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", d => d.y1 - d.y0)
+            .style("fill", d => getColor(d))
+            .on("click", function (event, d) {
+                if (d.children && d.data !== currentRoot.data) {
+                    event.stopPropagation();
+                    historyStack.push(currentRoot.data.name);
+                    currentRoot = d;
+                    outerSvg.call(zoom.transform, d3.zoomIdentity);
+                    currentScale = 1;
+                    drawTreemap(d);
+                    backButton.style("display", "block");
+                }
+            });
+
+        const textGroups = allNodes.filter(d => !d.children)
+            .append("g")
+            .attr("class", d => `text-group ${textFits(d, currentScale) ? "visible-text" : "hidden-text"}`)
+            .append("text")
+            .attr("fill", "white")
+            .attr("class", "label")
+            .style("font-size", d => `${0.75 / currentScale}em`)
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .attr("y", d => (d.y1 - d.y0) / 2)
+            .attr("text-anchor", "middle")
+            .append("tspan")
+            .text(d => d.data.name)
+            .attr("dy", "-0.5em")
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .append("tspan")
+            .text(d => d.data.colorValue)
+            .attr("dy", "1.2em")
+            .attr("x", d => (d.x1 - d.x0) / 2);
+
+        allNodes.filter(d => d.children)
+            .append("svg")
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", 20)
+            .attr("fill", "white")
+            .append("text")
+            .attr("class", "header")
+            .attr("text-anchor", "middle")
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .attr("y", 10)
+            .attr("dominant-baseline", "middle")
+            .style("font-size", d => `${0.75 / currentScale}em`)
+            .text(d => d.data.name);
+
+    }
+
+    function onBackPressed() {
+        if (historyStack.length > 0) {
+            const lastName = historyStack.pop();
+            let nodeData = findNodeByName(lastName);
+
+            if (!nodeData) {
+                nodeData = data;
+            }
+
+            const nodeHierarchy = d3.hierarchy(nodeData)
+                .sum(d => d.value)
+                .sort((a, b) => b.value - a.value);
+
+            currentRoot = nodeHierarchy;
+            outerSvg.call(zoom.transform, d3.zoomIdentity);
+            currentScale = 1;
+            drawTreemap(nodeHierarchy);
+
+            if (historyStack.length === 0) {
+                backButton.style("display", "none");
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    function findNodeByName(name, node = allData) {
+        if (node.name === name) return node;
+        if (!node.children) return null;
+
+        for (let child of node.children) {
+            const found = findNodeByName(name, child);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    function updateTextVisibility() {
+        zoomLayer.selectAll(".label")
+            .each(function (d) {
+                const label = d3.select(this);
+                const newSize = `${0.75 / currentScale}em`;
+                if (label.style("font-size") !== newSize) {
+                    label.style("font-size", newSize);
+                }
+            });
+
+        zoomLayer.selectAll(".header")
+            .each(function (d) {
+                const header = d3.select(this);
+                const newSize = `${0.75 / currentScale}em`;
+                if (header.style("font-size") !== newSize) {
+                    header.style("font-size", newSize);
+                }
+            });
+
+        zoomLayer.selectAll(".text-group")
+            .each(function (d) {
+                const fits = textFits(d, currentScale);
+                d3.select(this)
+                    .classed("visible-text", fits)
+                    .classed("hidden-text", !fits);
+            });
+    }
+
+    function onBackPressed() {
+        if (historyStack.length > 0) {
+            const lastName = historyStack.pop();
+            let nodeData = findNodeByName(lastName);
+
+            if (!nodeData) {
+                nodeData = allData;
+            }
+
+            const nodeHierarchy = d3.hierarchy(nodeData)
+                .sum(d => d.value)
+                .sort((a, b) => b.value - a.value);
+
+            currentRoot = nodeHierarchy;
+            drawTreemap(nodeHierarchy);
+
+
+            outerSvg.call(zoom.transform, d3.zoomIdentity);
+
+            return true;
+        }
+        return false;
+    }
+
+
+    const zoom = d3.zoom()
+        .scaleExtent([1, 100])
+        .translateExtent([[0, 0], [width, height]])
+        .on("zoom", function (event) {
+            zoomLayer.attr("transform", event.transform);
+            currentScale = event.transform.k;
+            updateTextVisibility()
+        });
+
+    function handleMessage(event, port) {
+        const message = event.data;
+        try {
+            const parsed = JSON.parse(message);
+
+            if (parsed.data && parsed.data.fn === "setData") {
+                const jsonString = parsed.data.params.data;
+                const data = JSON.parse(jsonString);
+                setData(data);
+            } else if (parsed.data.fn === "onBackPressed") {
+                const result = onBackPressed();
+                const response = {
+                    messageType: "Message::FunctionResult",
+                    data: {
+                        fn: parsed.data.fn,
+                        uuid: parsed.data.uuid,
+                        result: result
+                    }
+                };
+
+                port.postMessage(JSON.stringify(response));
+            }
+        } catch (e) {
+            console.error("Error handling message", e);
+        }
+    }
+
+    window.addEventListener("message", function (event) {
+        if (event.ports && event.ports.length > 0) {
+            const port = event.ports[0];
+            port.onmessage = (e) => handleMessage(e, port);
+            port.start?.();
+        }
+    });
+
+
+    outerSvg.call(zoom);
+</script>
 </body>
 
 </html>

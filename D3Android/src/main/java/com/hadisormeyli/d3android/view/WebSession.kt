@@ -29,6 +29,7 @@ internal class WebSession @JvmOverloads constructor(
         @SuppressLint("SetJavaScriptEnabled")
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
+        settings.allowContentAccess = true
     }
 
     fun onSessionReady(onReady: () -> Unit) {

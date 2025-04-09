@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.hadisormeyli.d3android"
+    namespace = "com.hadiSormeyli.d3android"
     compileSdk = 35
 
     defaultConfig {
@@ -53,7 +53,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 from(components["release"])
 
-                groupId = "com.github.hadisormeyli"
+                groupId = "com.github.hadiSormeyli"
                 artifactId = "D3Android"
                 version = "v1.0.0"
             }
