@@ -66,24 +66,24 @@
         colors: ["#B53849", "#414554", "#318F54"]
     };
 
-    function containsCurrentRootName(node) {
-        if (!currentRoot) {
-            return false;
-        }
+    function containsCurrentRootName(root) {
+            if (!currentRoot) {
+                return root;
+            }
 
-        if (node.name === currentRoot.data.name) {
-            return true;
-        }
+            if (root.data.name === currentRoot.data.name) {
+                return root;
+            }
 
-        if (node.children) {
-            for (let child of node.children) {
-                if (child.name == currentRoot.data.name) {
-                    return true;
+            if (root.children) {
+                for (let child of root.children) {
+                    if (child.data.name == currentRoot.data.name) {
+                        return child;
+                    }
                 }
             }
-        }
-        return false;
-    }
+            return root;
+     }
 
     function setData(data) {
         allData = data;
@@ -91,10 +91,7 @@
             .sum(d => d.value)
             .sort((a, b) => b.value - a.value);
 
-
-        if (!containsCurrentRootName(data)) {
-            currentRoot = root;
-        }
+        currentRoot = containsCurrentRootName(root)
         drawTreemap(currentRoot);
     }
 
