@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 //                )
 //            )
 
-            val data = createTreeMapData()
+            val data = distributeDataIntoGroups()
 
 
             withContext(Dispatchers.Main) {
