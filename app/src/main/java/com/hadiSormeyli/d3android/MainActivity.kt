@@ -1,9 +1,12 @@
 package com.hadiSormeyli.d3android
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.hadiSormeyli.d3android.model.ColorRange
+import com.hadiSormeyli.d3android.model.TreeColorOptions
 import com.hadiSormeyli.d3android.model.TreeMapNodeData
 import com.hadiSormeyli.d3android.view.StockTreeMapVew
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +31,10 @@ class MainActivity : AppCompatActivity() {
 
         val stockTreeMapVew = findViewById<StockTreeMapVew>(R.id.webView)
 
+        stockTreeMapVew.subscribeOnChartStateChange {
+            Log.d("Tag", "$it")
+        }
+
 
         findViewById<Button>(R.id.back_button).setOnClickListener {
             handleBackPress(stockTreeMapVew)
@@ -40,66 +47,68 @@ class MainActivity : AppCompatActivity() {
         })
 
         CoroutineScope(Dispatchers.IO).launch {
-//            val bGroupChildren = mutableListOf<TreeMapNodeData>()
-//            for (i in 1..200) {
-//                bGroupChildren.add(
-//                    TreeMapNodeData(
-//                        name = "B$i",
-//                        value = floor(Math.random() * 500).toFloat(), // Dynamic value
-//                        colorValue = (floor(Math.random() * 100) - 50).toFloat()// Dynamic color value
-//                    )
-//                )
-//            }
-//
-//            val data = TreeMapNodeData(
-//                name = "root",
-//                children = listOf(
-//                    TreeMapNodeData(
-//                        name = "A",
-//                        children = listOf(
-//                            TreeMapNodeData(name = "A3-1", value = 200f, colorValue = 10f),
-//                            TreeMapNodeData(name = "A3-2", value = 100f, colorValue = -10f),
-//                            TreeMapNodeData(name = "A3-3", value = 150f, colorValue = 5f),
-//                            TreeMapNodeData(name = "A3-4", value = 50f, colorValue = -5f)
-//                        )
-//                    ),
-//                    TreeMapNodeData(
-//                        name = "D",
-//                        children = listOf(
-//                            TreeMapNodeData(name = "D3-1", value = 200f, colorValue = 10f),
-//                            TreeMapNodeData(name = "D3-2", value = 100f, colorValue = -10f),
-//                            TreeMapNodeData(name = "D3-3", value = 150f, colorValue = 5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f),
-//                            TreeMapNodeData(name = "D3-4", value = 50f, colorValue = -5f)
-//                        )
-//                    ),
-//                    TreeMapNodeData(
-//                        name = "B",
-//                        children = bGroupChildren
-//                    ),
-//                    TreeMapNodeData(
-//                        name = "C",
-//                        children = listOf(
-//                            TreeMapNodeData(name = "C1", value = 300f, colorValue = 15f),
-//                            TreeMapNodeData(name = "C2", value = 100f, colorValue = -5f),
-//                            TreeMapNodeData(name = "C3", value = 450f, colorValue = 25f),
-//                            TreeMapNodeData(name = "C4", value = 50f, colorValue = -15f)
-//                        )
-//                    )
-//                )
-//            )
+            val bGroupChildren = mutableListOf<TreeMapNodeData>()
+            for (i in 1..900) {
+                bGroupChildren.add(
+                    TreeMapNodeData(
+                        name = "B$i",
+                        sizeValue = floor(Math.random() * 500).toFloat(), // Dynamic value
+                        colorValue = (floor(Math.random() * 100) - 50).toFloat(),
+                        value = (floor(Math.random() * 100) - 50).toFloat()// Dynamic color value
+                    )
+                )
+            }
 
-            val data = distributeDataIntoGroups()
-
+            val data = TreeMapNodeData(
+                name = "root",
+                children = listOf(
+                    TreeMapNodeData(
+                        name = "A",
+                        children = listOf(
+                            TreeMapNodeData(name = "A3-1", sizeValue = 200f, colorValue = 10f, value = 100f),
+                            TreeMapNodeData(name = "A3-2", sizeValue = 100f, colorValue = -10f, value = 100f),
+                            TreeMapNodeData(name = "A3-3", sizeValue = 150f, colorValue = 5f, value = 100f),
+                            TreeMapNodeData(name = "A3-4", sizeValue = 50f, colorValue = -5f, value = 100f)
+                        )
+                    ),
+                    TreeMapNodeData(
+                        name = "D",
+                        children = listOf(
+                            TreeMapNodeData(name = "D3-1", sizeValue = 200f, colorValue = 10f, value = 100f),
+                            TreeMapNodeData(name = "D3-2", sizeValue = 100f, colorValue = -10f, value = 100f),
+                            TreeMapNodeData(name = "D3-3", sizeValue = 150f, colorValue = 5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f)
+                        )
+                    ),
+                    TreeMapNodeData(
+                        name = "B",
+                        children = bGroupChildren
+                    ),
+                    TreeMapNodeData(
+                        name = "C",
+                        children = listOf(
+                            TreeMapNodeData(name = "C1", sizeValue = 300f, colorValue = 15f, value = 100f),
+                            TreeMapNodeData(name = "C2", sizeValue = 100f, colorValue = -5f, value = 100f),
+                            TreeMapNodeData(name = "C3", sizeValue = 450f, colorValue = 25f, value = 100f),
+                            TreeMapNodeData(name = "C4", sizeValue = 50f, colorValue = -15f, value = 100f)
+                        )
+                    )
+                )
+            )
 
             withContext(Dispatchers.Main) {
-                stockTreeMapVew.api.setData(data)
+                stockTreeMapVew.api.setData(
+                    data, TreeColorOptions(
+
+                    )
+                )
             }
         }
     }
@@ -111,62 +120,133 @@ class MainActivity : AppCompatActivity() {
                 TreeMapNodeData(
                     name = "فروشگاه الکترونیک",  // "Electronics Store"
                     children = listOf(
-                        TreeMapNodeData(name = "تلویزیون", value = 200f, colorValue = 10f),  // "TV"
-                        TreeMapNodeData(name = "گوشی موبایل", value = 100f, colorValue = -10f),  // "Mobile Phone"
-                        TreeMapNodeData(name = "لپ‌تاپ", value = 150f, colorValue = 5f),  // "Laptop"
-                        TreeMapNodeData(name = "دوربین عکاسی", value = 50f, colorValue = -5f),  // "Camera"
-                        TreeMapNodeData(name = "کنسول بازی", value = 50f, colorValue = -5f)  // "Game Console"
+                        TreeMapNodeData(
+                            name = "تلویزیون",
+                            sizeValue = 200f,
+                            colorValue = 10f,
+                            value = 100f
+                        ),  // "TV"
+                        TreeMapNodeData(
+                            name = "گوشی موبایل",
+                            sizeValue = 100f,
+                            colorValue = -10f,
+                            value = 100f
+                        ),  // "Mobile Phone"
+                        TreeMapNodeData(
+                            name = "لپ‌تاپ",
+                            sizeValue = 150f,
+                            colorValue = 5f,
+                            value = 100f
+                        ),  // "Laptop"
+                        TreeMapNodeData(
+                            name = "دوربین عکاسی",
+                            sizeValue = 50f,
+                            colorValue = -5f,
+                            value = 100f
+                        ),  // "Camera"
+                        TreeMapNodeData(
+                            name = "کنسول بازی",
+                            sizeValue = 50f,
+                            colorValue = -5f,
+                            value = 100f
+                        )  // "Game Console"
                     )
                 ),
                 TreeMapNodeData(
                     name = "فروشگاه پوشاک",  // "Clothing Store"
                     children = listOf(
-                        TreeMapNodeData(name = "پیراهن مردانه", value = 200f, colorValue = 0f),  // "Men's Shirt"
-                        TreeMapNodeData(name = "دستکش زنانه", value = 400f, colorValue = 20f),  // "Women's Gloves"
-                        TreeMapNodeData(name = "کت و شلوار", value = 250f, colorValue = 10f),  // "Suit"
-                        TreeMapNodeData(name = "کفش ورزشی", value = 150f, colorValue = -10f)  // "Sports Shoes"
+                        TreeMapNodeData(
+                            name = "پیراهن مردانه",
+                            sizeValue = 200f,
+                            colorValue = 0f,
+                            value = 100f
+                        ),  // "Men's Shirt"
+                        TreeMapNodeData(
+                            name = "دستکش زنانه",
+                            sizeValue = 400f,
+                            colorValue = 20f,
+                            value = 100f
+                        ),  // "Women's Gloves"
+                        TreeMapNodeData(
+                            name = "کت و شلوار",
+                            sizeValue = 250f,
+                            colorValue = 10f,
+                            value = 100f
+                        ),  // "Suit"
+                        TreeMapNodeData(
+                            name = "کفش ورزشی",
+                            sizeValue = 150f,
+                            colorValue = -10f,
+                            value = 100f
+                        )  // "Sports Shoes"
                     )
                 ),
                 TreeMapNodeData(
                     name = "فروشگاه لوازم خانگی",  // "Home Appliances Store"
                     children = listOf(
-                        TreeMapNodeData(name = "یخچال", value = 300f, colorValue = 15f),  // "Refrigerator"
-                        TreeMapNodeData(name = "ماشین لباسشویی", value = 100f, colorValue = -5f),  // "Washing Machine"
-                        TreeMapNodeData(name = "آسیاب برقی", value = 450f, colorValue = 25f),  // "Electric Grinder"
-                        TreeMapNodeData(name = "چای ساز", value = 50f, colorValue = -15f)  // "Tea Maker"
+                        TreeMapNodeData(
+                            name = "یخچال",
+                            sizeValue = 300f,
+                            colorValue = 15f,
+                            value = 100f
+                        ),  // "Refrigerator"
+                        TreeMapNodeData(
+                            name = "ماشین لباسشویی",
+                            sizeValue = 100f,
+                            colorValue = -5f,
+                            value = 100f
+                        ),  // "Washing Machine"
+                        TreeMapNodeData(
+                            name = "آسیاب برقی",
+                            sizeValue = 450f,
+                            colorValue = 25f,
+                            value = 100f
+                        ),  // "Electric Grinder"
+                        TreeMapNodeData(
+                            name = "چای ساز",
+                            sizeValue = 50f,
+                            colorValue = -15f,
+                            value = 100f
+                        )  // "Tea Maker"
                     )
                 )
             )
         )
     }
 
-    fun distributeDataIntoGroups() : TreeMapNodeData {
-            // Step 1: Create 900 random data points
-            val totalDataPoints = 900
-            val totalGroups = 30
-            val dataPoints = mutableListOf<TreeMapNodeData>()
+    fun distributeDataIntoGroups(): TreeMapNodeData {
+        // Step 1: Create 900 random data points
+        val totalDataPoints = 900
+        val totalGroups = 30
+        val dataPoints = mutableListOf<TreeMapNodeData>()
 
-            for (i in 1..totalDataPoints) {
-                val value = floor(Math.random() * 500).toFloat()  // Dynamic value
-                val colorValue = (floor(Math.random() * 100) - 50).toFloat()  // Dynamic color value
-                dataPoints.add(TreeMapNodeData(name = "Data$i", value = value, colorValue = colorValue))
-            }
-
-            // Step 2: Distribute the 900 data points into 30 groups
-            val groupSize = totalDataPoints / totalGroups
-            val groups = mutableListOf<TreeMapNodeData>()
-
-            for (i in 0 until totalGroups) {
-                val groupName = "Group ${i + 1}"
-                val groupData = dataPoints.subList(i * groupSize, (i + 1) * groupSize)
-                groups.add(TreeMapNodeData(name = groupName, children = groupData))
-            }
-
-            // Step 3: Create the root node with 30 groups as children
-            return TreeMapNodeData(
-                name = "root",
-                children = groups
+        for (i in 1..totalDataPoints) {
+            val value = floor(Math.random() * 500).toFloat()  // Dynamic value
+            val colorValue = (floor(Math.random() * 100) - 50).toFloat()  // Dynamic color value
+            dataPoints.add(
+                TreeMapNodeData(
+                    name = "Data$i",
+                    sizeValue = value,
+                    colorValue = colorValue
+                )
             )
+        }
+
+        // Step 2: Distribute the 900 data points into 30 groups
+        val groupSize = totalDataPoints / totalGroups
+        val groups = mutableListOf<TreeMapNodeData>()
+
+        for (i in 0 until totalGroups) {
+            val groupName = "Group ${i + 1}"
+            val groupData = dataPoints.subList(i * groupSize, (i + 1) * groupSize)
+            groups.add(TreeMapNodeData(name = groupName, children = groupData))
+        }
+
+        // Step 3: Create the root node with 30 groups as children
+        return TreeMapNodeData(
+            name = "root",
+            children = groups
+        )
 
 
     }

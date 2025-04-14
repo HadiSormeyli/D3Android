@@ -59,6 +59,8 @@ class WebMessageChannel(private val logLevel: LogLevel, ports: List<WebMessagePo
     ): WebMessageCompat {
         val jsonMessage = serializer.toJson(bridgeMessage)
 
+        Log.d("Tag", jsonMessage)
+
         return WebMessageCompat(jsonMessage, port?.let { arrayOf(it) })
     }
 

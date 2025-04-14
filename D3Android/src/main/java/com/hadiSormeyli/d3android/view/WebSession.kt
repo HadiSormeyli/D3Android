@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.webkit.WebResourceErrorCompat
@@ -33,6 +34,7 @@ internal class WebSession @JvmOverloads constructor(
         settings.allowFileAccessFromFileURLs = true
         settings.allowUniversalAccessFromFileURLs = true
         settings.allowContentAccess = true
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
     }
 
     fun onSessionReady(onReady: () -> Unit) {

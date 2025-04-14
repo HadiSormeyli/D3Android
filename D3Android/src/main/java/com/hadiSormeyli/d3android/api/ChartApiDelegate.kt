@@ -2,6 +2,7 @@ package com.hadiSormeyli.d3android.api
 
 import com.google.gson.JsonElement
 import com.hadiSormeyli.d3android.api.serializer.Deserializer
+import com.hadiSormeyli.d3android.model.TreeColorOptions
 import com.hadiSormeyli.d3android.model.TreeMapNodeData
 import com.hadiSormeyli.d3android.runtime.controller.WebMessageController
 import com.hadiSormeyli.d3android.runtime.version.ChartRuntimeObject
@@ -16,7 +17,14 @@ class ChartApiDelegate(
     fun setData(data: TreeMapNodeData) {
         controller.callFunction(
             "setData",
-            mapOf("data" to data.toJson())
+            mapOf("data" to data)
+        )
+    }
+
+    fun setData(data: TreeMapNodeData, colorOptions: TreeColorOptions) {
+        controller.callFunction(
+            "setData",
+            mapOf("data" to data, "colors" to colorOptions)
         )
     }
 
@@ -24,7 +32,7 @@ class ChartApiDelegate(
         controller.callFunction(
             "onBackPressed",
             callback = callback,
-            deserializer = object : Deserializer<Boolean>({}) {
+            deserializer = object : Deserializer<Boolean>() {
                 override fun deserialize(json: JsonElement): Boolean? {
                     return json.asBoolean
                 }

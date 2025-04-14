@@ -5,7 +5,7 @@ import com.google.gson.JsonElement
 import com.hadiSormeyli.d3android.api.serializer.gson.GsonProvider
 
 
-abstract class Deserializer<T>(function: () -> Unit) {
+abstract class Deserializer<T> {
 
     protected open val gson: Gson by lazy { GsonProvider.newInstance() }
 

@@ -68,29 +68,15 @@ class StockTreeMapVew @JvmOverloads constructor(
 
     val api by lazy { ChartApiDelegate(webMessageController) }
 
-    private val loadingView = ProgressBar(context).apply {
-        layoutParams = LayoutParams(
-            LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = Gravity.CENTER
-        }
-        indeterminateTintList = ColorStateList.valueOf(Color.parseColor("#2B6CF7"))
-        visibility = View.VISIBLE
-    }
-
-
     init {
         webView.onSessionReady {
             state = when {
                 notSupportedFeatures.isEmpty() -> {
                     webMessageController.setWebMessageChannel(channel)
-                    loadingView.visibility = View.GONE
                     State.Ready()
                 }
 
                 else -> {
-                    loadingView.visibility = View.GONE
                     val textView = TextView(context).apply {
                         layoutParams = LayoutParams(
                             LayoutParams.WRAP_CONTENT,
@@ -110,21 +96,23 @@ class StockTreeMapVew @JvmOverloads constructor(
             }
         }
         addView(webView)
-        addView(loadingView)
-    }
-
-    final override fun addView(child: View?) {
-        super.addView(child)
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (state is State.Ready) {
-            loadingView.visibility = View.GONE
-        } else {
+        if (state !is State.Ready) {
             state = State.Preparing()
             webView.loadUrl(DEFAULT_URL)
         }
+    }
+
+    fun subscribeOnChartStateChange(subscriber: (State) -> Unit) {
+        onStateChanged.add(subscriber)
+        subscriber.invoke(state)
+    }
+
+    fun unsubscribeOnChartStateChange(subscriber: (State) -> Unit) {
+        onStateChanged.remove(subscriber)
     }
 
     private fun checkSupportedFeature(): List<String> {

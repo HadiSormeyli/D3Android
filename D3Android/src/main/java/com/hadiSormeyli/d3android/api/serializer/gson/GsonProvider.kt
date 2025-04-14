@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder
 
 object GsonProvider {
     fun newInstance(): Gson {
-        return GsonBuilder().create()
+        return GsonBuilder()
+            .serializeSpecialFloatingPointValues()
+            .create()
     }
 }

@@ -1,6 +1,5 @@
 package com.hadiSormeyli.d3android.runtime.controller
 
-import android.util.Log
 import com.google.gson.JsonElement
 import com.hadiSormeyli.d3android.api.serializer.Deserializer
 import com.hadiSormeyli.d3android.api.serializer.PrimitiveSerializer

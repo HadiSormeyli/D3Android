@@ -5,46 +5,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart Zoomable Treemap</title>
-    <script src="d3.v7.min.js"></script>
+    <script src="d3.v5.min.js"></script>
     <style>
         @font-face {
-              font-family: 'dana';
-              src: url('file:///android_asset/dana_fa_medium.ttf') format('truetype');
-              font-weight: normal;
-              font-style: normal;
-          }
+            font-family: 'DanaFa';
+            src: url('file:///android_asset/dana_fa_medium.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-          body {
-              margin: 0;
-              font-family: 'dana';
-              overflow: hidden;
-          }
-
-          .header {
-              font-family: 'dana';
-              pointer-events: none;
-              text-overflow: clip;
-              overflow: hidden;
-              white-space: nowrap;
-          }
-
-          .label {
-              font-family: 'dana';
-              pointer-events: none;
-          }
-
-          .hidden-text {
-              opacity: 0;
-          }
-
-          .visible-text {
-              opacity: 1;
-          }
+        body {
+            margin: 0;
+            font-family: 'DanaFa';
+            overflow: hidden;
+        }
     </style>
 </head>
 
 <body>
 <svg width="100%" height="100%"></svg>
+
 <script>
     const margin = { top: 0, right: 0, bottom: 0, left: 0 };
     const width = window.innerWidth - margin.left - margin.right;
@@ -55,15 +35,20 @@
         .attr("height", height);
 
     const zoomLayer = outerSvg.append("g");
-    const backButton = d3.select(".back-button");
-    let allData = []
+
     let currentRoot = null;
     let historyStack = [];
     let currentScale = 1;
+    let allData = []
     let colorParser = {
         headerColor: "#4A4D57",
-        range: 0,
-        colors: ["#B53849", "#414554", "#318F54"]
+        colorRanges: [
+            { min: -Infinity, max: -3, color: "#F71E3C" },
+            { min: -3, max: -1, color: "#B53849" },
+            { min: -1, max: 1, color: "#414554" },
+            { min: 1, max: 3, color: "#318F54" },
+            { min: 3, max: Infinity, color: "#26C963" }
+        ]
     };
 
     function containsCurrentRootName(root) {
@@ -85,22 +70,29 @@
             return root;
      }
 
-    function setData(data) {
+    function setData(data, newColorParser = colorParser) {
+        colorParser = newColorParser;
         allData = data;
         const root = d3.hierarchy(data)
-            .sum(d => d.value)
-            .sort((a, b) => b.value - a.value);
+            .sum(d => d.sizeValue)
+            .sort((a, b) => b.sizeValue - a.sizeValue);
 
-        currentRoot = containsCurrentRootName(root)
+         currentRoot = containsCurrentRootName(root)
         drawTreemap(currentRoot);
     }
 
     function getColor(d) {
         if (!d.children) {
-            if (d.data.colorValue > 0) return colorParser.colors[2];
-            if (d.data.colorValue === 0) return colorParser.colors[1];
-            return colorParser.colors[0];
+            const val = d.data.colorValue;
+
+            for (let range of colorParser.colorRanges) {
+                if (val >= range.min && val < range.max) {
+                    return range.color;
+                }
+            }
+            return "#ccc";
         }
+
         return colorParser.headerColor;
     }
 
@@ -113,7 +105,7 @@
 
         const maxLineLength = Math.max(
             d.data.name.length * avgCharWidth,
-            String(d.value).length * avgCharWidth
+            String(d.sizeValue).length * avgCharWidth
         );
 
         return maxLineLength <= boxWidth && (lineHeight * textLines) <= boxHeight;
@@ -128,8 +120,8 @@
             .round(true);
 
         const rootCopy = d3.hierarchy(rootNode.data ? rootNode.data : rootNode)
-            .sum(d => d.value)
-            .sort((a, b) => b.value - a.value);
+            .sum(d => d.sizeValue)
+            .sort((a, b) => b.sizeValue - a.sizeValue);
 
         treemap(rootCopy);
 
@@ -144,25 +136,13 @@
             .style("stroke-width", d => d.children ? 0.25 : 0.5)
             .attr("width", d => d.x1 - d.x0)
             .attr("height", d => d.y1 - d.y0)
-            .style("fill", d => getColor(d))
-            .on("click", function (event, d) {
-                if (d.children && d.data !== currentRoot.data) {
-                    event.stopPropagation();
-                    historyStack.push(currentRoot.data.name);
-                    currentRoot = d;
-                    outerSvg.call(zoom.transform, d3.zoomIdentity);
-                    currentScale = 1;
-                    drawTreemap(d);
-                    backButton.style("display", "block");
-                }
-            });
+            .style("fill", d => getColor(d));
 
-        const textGroups = allNodes.filter(d => !d.children)
-            .append("g")
-            .attr("class", d => `text-group ${textFits(d, currentScale) ? "visible-text" : "hidden-text"}`)
+        allNodes.filter(d => !d.children).append("g")
             .append("text")
+            .attr("class", "items")
+            .style("display", d => `${textFits(d, currentScale) ? null : "none"}`)
             .attr("fill", "white")
-            .attr("class", "label")
             .style("font-size", d => `${0.75 / currentScale}em`)
             .attr("x", d => (d.x1 - d.x0) / 2)
             .attr("y", d => (d.y1 - d.y0) / 2)
@@ -172,51 +152,35 @@
             .attr("dy", "-0.5em")
             .attr("x", d => (d.x1 - d.x0) / 2)
             .append("tspan")
-            .text(d => d.data.colorValue)
+            .text(d => `\u200E${+d.data.value}`)
             .attr("dy", "1.2em")
             .attr("x", d => (d.x1 - d.x0) / 2);
 
         allNodes.filter(d => d.children)
+            .on("click", function (d) {
+                if (d.data !== currentRoot.data) {
+                    historyStack.push(currentRoot.data.name);
+                    currentRoot = d;
+                    outerSvg.call(zoom.transform, d3.zoomIdentity);
+                    currentScale = 1;
+                    drawTreemap(d);
+
+                }
+            })
             .append("svg")
             .attr("width", d => d.x1 - d.x0)
             .attr("height", 20)
             .attr("fill", "white")
             .append("text")
-            .attr("class", "header")
+            .attr("class", "items")
             .attr("text-anchor", "middle")
             .attr("x", d => (d.x1 - d.x0) / 2)
             .attr("y", 10)
+            .style("overflows", "hidden")
+            .style("white-space", "nowrap")
             .attr("dominant-baseline", "middle")
             .style("font-size", d => `${0.75 / currentScale}em`)
             .text(d => d.data.name);
-
-    }
-
-    function onBackPressed() {
-        if (historyStack.length > 0) {
-            const lastName = historyStack.pop();
-            let nodeData = findNodeByName(lastName);
-
-            if (!nodeData) {
-                nodeData = data;
-            }
-
-            const nodeHierarchy = d3.hierarchy(nodeData)
-                .sum(d => d.value)
-                .sort((a, b) => b.value - a.value);
-
-            currentRoot = nodeHierarchy;
-            outerSvg.call(zoom.transform, d3.zoomIdentity);
-            currentScale = 1;
-            drawTreemap(nodeHierarchy);
-
-            if (historyStack.length === 0) {
-                backButton.style("display", "none");
-            }
-
-            return true;
-        }
-        return false;
     }
 
     function findNodeByName(name, node = allData) {
@@ -230,31 +194,29 @@
         return null;
     }
 
-    function updateTextVisibility() {
-        zoomLayer.selectAll(".label")
+    function isInView(d, transform) {
+        const x = d.x0 * transform.k + transform.x;
+        const y = d.y0 * transform.k + transform.y;
+        const width = (d.x1 - d.x0) * transform.k;
+        const height = (d.y1 - d.y0) * transform.k;
+
+        return (
+            x + width > 0 &&
+            y + height > 0 &&
+            x < window.innerWidth &&
+            y < window.innerHeight
+        );
+    }
+
+    function updateTextVisibility(transform) {
+        zoomLayer.selectAll(".items")
             .each(function (d) {
                 const label = d3.select(this);
-                const newSize = `${0.75 / currentScale}em`;
-                if (label.style("font-size") !== newSize) {
-                    label.style("font-size", newSize);
-                }
-            });
-
-        zoomLayer.selectAll(".header")
-            .each(function (d) {
-                const header = d3.select(this);
-                const newSize = `${0.75 / currentScale}em`;
-                if (header.style("font-size") !== newSize) {
-                    header.style("font-size", newSize);
-                }
-            });
-
-        zoomLayer.selectAll(".text-group")
-            .each(function (d) {
-                const fits = textFits(d, currentScale);
-                d3.select(this)
-                    .classed("visible-text", fits)
-                    .classed("hidden-text", !fits);
+                const fits = textFits(d, transform.k);
+                const inView = isInView(d, transform);
+                label
+                    .style("font-size", `${0.75 / transform.k}em`)
+                    .style("display", (!d.children) ? ((fits && inView) ? null : "none") : null);
             });
     }
 
@@ -268,12 +230,11 @@
             }
 
             const nodeHierarchy = d3.hierarchy(nodeData)
-                .sum(d => d.value)
-                .sort((a, b) => b.value - a.value);
+                .sum(d => d.sizeValue)
+                .sort((a, b) => b.sizeValue - a.sizeValue);
 
             currentRoot = nodeHierarchy;
             drawTreemap(nodeHierarchy);
-
 
             outerSvg.call(zoom.transform, d3.zoomIdentity);
 
@@ -282,14 +243,14 @@
         return false;
     }
 
-
     const zoom = d3.zoom()
         .scaleExtent([1, 100])
         .translateExtent([[0, 0], [width, height]])
-        .on("zoom", function (event) {
+        .on("zoom", function () {
+            const event = d3.event;
             zoomLayer.attr("transform", event.transform);
             currentScale = event.transform.k;
-            updateTextVisibility()
+            updateTextVisibility(event.transform);
         });
 
     function handleMessage(event, port) {
@@ -298,9 +259,9 @@
             const parsed = JSON.parse(message);
 
             if (parsed.data && parsed.data.fn === "setData") {
-                const jsonString = parsed.data.params.data;
-                const data = JSON.parse(jsonString);
-                setData(data);
+                const data = parsed.data.params.data;
+                const colors = parsed.data.params.colors;
+                setData(data, colors);
             } else if (parsed.data.fn === "onBackPressed") {
                 const result = onBackPressed();
                 const response = {
@@ -326,8 +287,6 @@
             port.start?.();
         }
     });
-
-
     outerSvg.call(zoom);
 </script>
 </body>
