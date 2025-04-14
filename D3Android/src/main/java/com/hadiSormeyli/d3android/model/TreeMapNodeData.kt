@@ -2,8 +2,8 @@ package com.hadiSormeyli.d3android.model
 
 open class TreeMapNodeData(
     val name: String,
-    val sizeValue: Float? = null,
+    val value: Float? = null,
     val colorValue: Float? = null,
-    val value: Float? = sizeValue,
+    val labelValue: Float? = value,
     val children: List<TreeMapNodeData>? = null
 )

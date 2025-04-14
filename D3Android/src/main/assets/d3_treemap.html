@@ -74,10 +74,10 @@
         colorParser = newColorParser;
         allData = data;
         const root = d3.hierarchy(data)
-            .sum(d => d.sizeValue)
-            .sort((a, b) => b.sizeValue - a.sizeValue);
+            .sum(d => d.value)
+            .sort((a, b) => b.value - a.value);
 
-         currentRoot = containsCurrentRootName(root)
+        currentRoot = containsCurrentRootName(root)
         drawTreemap(currentRoot);
     }
 
@@ -90,7 +90,7 @@
                     return range.color;
                 }
             }
-            return "#ccc";
+            return d.data.colorValue[0].color;
         }
 
         return colorParser.headerColor;
@@ -105,7 +105,7 @@
 
         const maxLineLength = Math.max(
             d.data.name.length * avgCharWidth,
-            String(d.sizeValue).length * avgCharWidth
+            String(d.labelValue).length * avgCharWidth
         );
 
         return maxLineLength <= boxWidth && (lineHeight * textLines) <= boxHeight;
@@ -116,18 +116,20 @@
 
         const treemap = d3.treemap()
             .size([width, height])
-            .paddingTop(20)
-            .round(true);
+            .paddingTop(24)
+            .round(false)
+            .tile(d3.treemapSquarify.ratio(1.2));
 
         const rootCopy = d3.hierarchy(rootNode.data ? rootNode.data : rootNode)
-            .sum(d => d.sizeValue)
-            .sort((a, b) => b.sizeValue - a.sizeValue);
+            .sum(d => d.value)
+            .sort((a, b) => b.value - a.value);
 
         treemap(rootCopy);
 
         const allNodes = zoomLayer.selectAll(".node")
             .data(rootCopy.descendants())
-            .enter().append("g")
+            .enter()
+            .append("g")
             .attr("class", "node")
             .attr("transform", d => `translate(${d.x0}, ${d.y0})`);
 
@@ -152,7 +154,7 @@
             .attr("dy", "-0.5em")
             .attr("x", d => (d.x1 - d.x0) / 2)
             .append("tspan")
-            .text(d => `\u200E${+d.data.value}`)
+            .text(d => `\u200E${+d.data.labelValue}`)
             .attr("dy", "1.2em")
             .attr("x", d => (d.x1 - d.x0) / 2);
 
@@ -169,13 +171,13 @@
             })
             .append("svg")
             .attr("width", d => d.x1 - d.x0)
-            .attr("height", 20)
+            .attr("height", 24)
             .attr("fill", "white")
             .append("text")
             .attr("class", "items")
             .attr("text-anchor", "middle")
             .attr("x", d => (d.x1 - d.x0) / 2)
-            .attr("y", 10)
+            .attr("y", 12)
             .style("overflows", "hidden")
             .style("white-space", "nowrap")
             .attr("dominant-baseline", "middle")
@@ -230,8 +232,8 @@
             }
 
             const nodeHierarchy = d3.hierarchy(nodeData)
-                .sum(d => d.sizeValue)
-                .sort((a, b) => b.sizeValue - a.sizeValue);
+                .sum(d => d.value)
+                .sort((a, b) => b.value - a.value);
 
             currentRoot = nodeHierarchy;
             drawTreemap(nodeHierarchy);

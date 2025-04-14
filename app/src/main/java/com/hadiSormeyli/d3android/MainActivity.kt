@@ -48,13 +48,13 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val bGroupChildren = mutableListOf<TreeMapNodeData>()
-            for (i in 1..900) {
+            for (i in 1..10) {
                 bGroupChildren.add(
                     TreeMapNodeData(
                         name = "B$i",
-                        sizeValue = floor(Math.random() * 500).toFloat(), // Dynamic value
+                        value = 11f - i,
+                        labelValue = floor(Math.random() * 500).toFloat(),
                         colorValue = (floor(Math.random() * 100) - 50).toFloat(),
-                        value = (floor(Math.random() * 100) - 50).toFloat()// Dynamic color value
                     )
                 )
             }
@@ -62,52 +62,18 @@ class MainActivity : AppCompatActivity() {
             val data = TreeMapNodeData(
                 name = "root",
                 children = listOf(
-                    TreeMapNodeData(
-                        name = "A",
-                        children = listOf(
-                            TreeMapNodeData(name = "A3-1", sizeValue = 200f, colorValue = 10f, value = 100f),
-                            TreeMapNodeData(name = "A3-2", sizeValue = 100f, colorValue = -10f, value = 100f),
-                            TreeMapNodeData(name = "A3-3", sizeValue = 150f, colorValue = 5f, value = 100f),
-                            TreeMapNodeData(name = "A3-4", sizeValue = 50f, colorValue = -5f, value = 100f)
-                        )
-                    ),
-                    TreeMapNodeData(
-                        name = "D",
-                        children = listOf(
-                            TreeMapNodeData(name = "D3-1", sizeValue = 200f, colorValue = 10f, value = 100f),
-                            TreeMapNodeData(name = "D3-2", sizeValue = 100f, colorValue = -10f, value = 100f),
-                            TreeMapNodeData(name = "D3-3", sizeValue = 150f, colorValue = 5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "D3-4", sizeValue = 50f, colorValue = -5f, value = 100f)
-                        )
-                    ),
+
                     TreeMapNodeData(
                         name = "B",
                         children = bGroupChildren
                     ),
-                    TreeMapNodeData(
-                        name = "C",
-                        children = listOf(
-                            TreeMapNodeData(name = "C1", sizeValue = 300f, colorValue = 15f, value = 100f),
-                            TreeMapNodeData(name = "C2", sizeValue = 100f, colorValue = -5f, value = 100f),
-                            TreeMapNodeData(name = "C3", sizeValue = 450f, colorValue = 25f, value = 100f),
-                            TreeMapNodeData(name = "C4", sizeValue = 50f, colorValue = -15f, value = 100f)
-                        )
-                    )
+
                 )
             )
 
             withContext(Dispatchers.Main) {
                 stockTreeMapVew.api.setData(
-                    data, TreeColorOptions(
-
-                    )
+                    data, TreeColorOptions()
                 )
             }
         }
@@ -122,31 +88,31 @@ class MainActivity : AppCompatActivity() {
                     children = listOf(
                         TreeMapNodeData(
                             name = "تلویزیون",
-                            sizeValue = 200f,
+                            labelValue = 200f,
                             colorValue = 10f,
                             value = 100f
                         ),  // "TV"
                         TreeMapNodeData(
                             name = "گوشی موبایل",
-                            sizeValue = 100f,
+                            labelValue = 100f,
                             colorValue = -10f,
                             value = 100f
                         ),  // "Mobile Phone"
                         TreeMapNodeData(
                             name = "لپ‌تاپ",
-                            sizeValue = 150f,
+                            labelValue = 150f,
                             colorValue = 5f,
                             value = 100f
                         ),  // "Laptop"
                         TreeMapNodeData(
                             name = "دوربین عکاسی",
-                            sizeValue = 50f,
+                            labelValue = 50f,
                             colorValue = -5f,
                             value = 100f
                         ),  // "Camera"
                         TreeMapNodeData(
                             name = "کنسول بازی",
-                            sizeValue = 50f,
+                            labelValue = 50f,
                             colorValue = -5f,
                             value = 100f
                         )  // "Game Console"
@@ -157,25 +123,25 @@ class MainActivity : AppCompatActivity() {
                     children = listOf(
                         TreeMapNodeData(
                             name = "پیراهن مردانه",
-                            sizeValue = 200f,
+                            labelValue = 200f,
                             colorValue = 0f,
                             value = 100f
                         ),  // "Men's Shirt"
                         TreeMapNodeData(
                             name = "دستکش زنانه",
-                            sizeValue = 400f,
+                            labelValue = 400f,
                             colorValue = 20f,
                             value = 100f
                         ),  // "Women's Gloves"
                         TreeMapNodeData(
                             name = "کت و شلوار",
-                            sizeValue = 250f,
+                            labelValue = 250f,
                             colorValue = 10f,
                             value = 100f
                         ),  // "Suit"
                         TreeMapNodeData(
                             name = "کفش ورزشی",
-                            sizeValue = 150f,
+                            labelValue = 150f,
                             colorValue = -10f,
                             value = 100f
                         )  // "Sports Shoes"
@@ -186,25 +152,25 @@ class MainActivity : AppCompatActivity() {
                     children = listOf(
                         TreeMapNodeData(
                             name = "یخچال",
-                            sizeValue = 300f,
+                            labelValue = 300f,
                             colorValue = 15f,
                             value = 100f
                         ),  // "Refrigerator"
                         TreeMapNodeData(
                             name = "ماشین لباسشویی",
-                            sizeValue = 100f,
+                            labelValue = 100f,
                             colorValue = -5f,
                             value = 100f
                         ),  // "Washing Machine"
                         TreeMapNodeData(
                             name = "آسیاب برقی",
-                            sizeValue = 450f,
+                            labelValue = 450f,
                             colorValue = 25f,
                             value = 100f
                         ),  // "Electric Grinder"
                         TreeMapNodeData(
                             name = "چای ساز",
-                            sizeValue = 50f,
+                            labelValue = 50f,
                             colorValue = -15f,
                             value = 100f
                         )  // "Tea Maker"
@@ -226,7 +192,7 @@ class MainActivity : AppCompatActivity() {
             dataPoints.add(
                 TreeMapNodeData(
                     name = "Data$i",
-                    sizeValue = value,
+                    labelValue = value,
                     colorValue = colorValue
                 )
             )

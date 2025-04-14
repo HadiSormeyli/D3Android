@@ -27,6 +27,8 @@ internal class WebSession @JvmOverloads constructor(
         )
         visibility = View.INVISIBLE
 
+//        setBackgroundColor()
+
         @SuppressLint("SetJavaScriptEnabled")
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
