@@ -6,7 +6,7 @@ class TreeColorOptions(
         ColorRange(
             color = "#F71E3C",
             min = -Float.MAX_VALUE,
-            max = -3f
+            max = -3f,
         ),
         ColorRange(
             color = "#B53849",

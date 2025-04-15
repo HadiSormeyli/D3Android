@@ -49,12 +49,13 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val bGroupChildren = mutableListOf<TreeMapNodeData>()
             for (i in 1..10) {
+                val colorValue = (floor(Math.random() * 6) - 3).toFloat()
                 bGroupChildren.add(
                     TreeMapNodeData(
                         name = "B$i",
                         value = 11f - i,
-                        labelValue = floor(Math.random() * 500).toFloat(),
-                        colorValue = (floor(Math.random() * 100) - 50).toFloat(),
+                        labelValue = colorValue,
+                        colorValue = colorValue,
                     )
                 )
             }

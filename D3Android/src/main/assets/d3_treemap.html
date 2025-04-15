@@ -81,19 +81,26 @@
         drawTreemap(currentRoot);
     }
 
-    function getColor(d) {
-        if (!d.children) {
-            const val = d.data.colorValue;
+    function isInRange(value, min, max, rangeType) {
+      switch (rangeType) {
+        case 'INCLUSIVE_INCLUSIVE':
+          return value >= min && value <= max;
+        case 'EXCLUSIVE_INCLUSIVE':
+          return value > min && value <= max;
+        case 'EXCLUSIVE_EXCLUSIVE':
+          return value > min && value < max;
+        default:
+         return value >= min && value < max;
+      }
+    }
 
-            for (let range of colorParser.colorRanges) {
-                if (val >= range.min && val < range.max) {
-                    return range.color;
-                }
-            }
-            return d.data.colorValue[0].color;
-        }
+    function getColorForValue(colorValue) {
+      const match = colorParser.colorRanges.find(range =>
+        isInRange(colorValue, range.min, range.max, range.rangeType)
+      );
 
-        return colorParser.headerColor;
+
+      return match ? match.color : colorParser.colorRanges[0].color;
     }
 
     function textFits(d, scale = 1) {
@@ -137,10 +144,11 @@
             .style("stroke", d => d.children ? "#888" : "#4A4D57")
             .style("stroke-width", d => d.children ? 0.25 : 0.5)
             .attr("width", d => d.x1 - d.x0)
-            .attr("height", d => d.y1 - d.y0)
-            .style("fill", d => getColor(d));
+            .attr("height", d => d.y1 - d.y0);
 
-        allNodes.filter(d => !d.children).append("g")
+        allNodes.filter(d => !d.children)
+             .style("fill", d => getColorForValue(d.data.colorValue))
+             .append("g")
             .append("text")
             .attr("class", "items")
             .style("display", d => `${textFits(d, currentScale) ? null : "none"}`)
@@ -159,6 +167,7 @@
             .attr("x", d => (d.x1 - d.x0) / 2);
 
         allNodes.filter(d => d.children)
+            .style("fill", d => colorParser.headerColor)
             .on("click", function (d) {
                 if (d.data !== currentRoot.data) {
                     historyStack.push(currentRoot.data.name);
